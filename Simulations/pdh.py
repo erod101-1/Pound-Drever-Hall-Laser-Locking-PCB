@@ -28,7 +28,7 @@ class cavity(CONSTANTS):
     L : float  # length of the cavity
     fsr : float = field(init=False) # free spectral range
     def __post_init__(self):
-        self.fsr = self.SPEED_OF_LIGHT/2*self.L
+        self.fsr = self.SPEED_OF_LIGHT/(2*self.L)
 
 class ReflectionCoeff(cavity):
     def __init__(self,**kwargs):
@@ -52,9 +52,42 @@ class ReflectedPower(ReflectionCoeff):
                                        int(1e6))
         
     def reflected_power(self):
-        t1 = np.real(self.laser.P_c*self.reflection_coefficient(self.omega_space - self.laser.omega_c)*np.conj(self.reflection_coefficient(self.omega_space - self.laser.omega_c)))
-        
-print(ReflectedPower().reflected_power())
+        # Detuning grid relative to the carrier
+        delta = self.omega_space - self.laser.omega_c
 
+        # Reflection coefficients at carrier and sidebands
+        F0 = self.reflection_coefficient(delta)
+        Fp = self.reflection_coefficient(delta + self.eom.omega_m)  # Omega + Omega
+        Fm = self.reflection_coefficient(delta - self.eom.omega_m)  # Omega − Omega
+
+        Pc = self.laser.P_c
+        Ps = self.eom.P_s
+        Omega  = self.eom.omega_m
+
+        # DC terms
+        t1 = Pc * (np.abs(F0) ** 2)
+        t2 = Ps * ((np.abs(Fp) ** 2) + (np.abs(Fm) ** 2))
+
+        # Cross terms at Omega (ignore 2Omega terms). Use t=0 for a single snapshot.
+        A = F0 * np.conj(Fp) - np.conj(F0) * Fm
+        t = 0.0
+        t3 = 2 * np.sqrt(Pc * Ps) * (np.real(A) * np.cos(Omega * t) + np.imag(A) * np.sin(Omega * t))
+
+        return t1 + t2 + t3
+
+
+
+rp = ReflectedPower()
+# Compute detuning 
+detuning = rp.omega_space - rp.laser.omega_c
+P_ref = rp.reflected_power()
+
+plt.figure(figsize=(8,5))
+plt.plot(detuning, P_ref)
+plt.title("Reflected Power vs Detuning")
+plt.xlabel("Detuning (rad/s)")
+plt.ylabel("Reflected Power (W)")
+plt.grid(True)
+plt.show()
 
 
