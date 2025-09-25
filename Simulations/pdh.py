@@ -44,7 +44,7 @@ class cavity:
 
 
 
-class ReflectedPower:
+class PDH:
     def __init__(self,**kwargs):
         
         self.cavity = kwargs.get('cavity',cavity(r=0.95, L=0.02))
@@ -102,7 +102,7 @@ class ReflectedPower:
 
 
 # PDH error signal 
-rp = ReflectedPower()
+rp = PDH()
 
 delta, Verr = rp.error_signal(demod_phase=-np.pi/2)
 
