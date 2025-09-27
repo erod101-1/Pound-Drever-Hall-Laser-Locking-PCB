@@ -1,0 +1,25 @@
+# Ignore compiled Python files
+*.pyc
+__pycache__/
+
+# Ignore editor/IDE generated files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore temp / log files
+*.log
+*.tmp
+
+# Ignore ssh keys
+*.pem
+*.key
+
+# Ignore sensitive information (e.g., API keys, database credentials)
+config.ini
+.env
+credentials.json
